@@ -1,6 +1,6 @@
 # blockchain-developer-bootcamp-final-project
 
-Idea: A proof-of-concept that allows sports gambling.
+Idea: A proof-of-concept that allows sports betting.
 
 Summary:
 
