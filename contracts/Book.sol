@@ -113,7 +113,6 @@ contract Book is usingProvable {
         require (pendingQueries[_myid].pending == true);
         bytes32 winningTeam = stringToBytes32(_result);
         // TODO: some team names are concatted
-        emit LogNewGameResult(_result);
         // other team is losingTeam
         bytes32 losingTeam;
         if (pendingQueries[_myid].teamName1 == winningTeam) {
