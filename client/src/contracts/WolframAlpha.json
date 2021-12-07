@@ -1807,9 +1807,44 @@
     "name": "solc",
     "version": "0.5.17+commit.d19bba13.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "5777": {
+      "events": {
+        "0xc4dc360d0a9c0677a3379ae0a3d81e887f761e65fdf3d7e00859d1bcd3c47389": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            }
+          ],
+          "name": "LogNewProvableQuery",
+          "type": "event"
+        },
+        "0x4c7d0b87e189b9f866291da1eb75ea9852bfff2c58a3eace1299a5a1d448caad": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "temperature",
+              "type": "string"
+            }
+          ],
+          "name": "LogNewTemperatureMeasure",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0xB3b0E00e283973F1655BC062cE9C7b2927264380",
+      "transactionHash": "0x0d30046b0a7d49b8b321a597e286cbab16643158d839a00ce4a592930c2b7bf0"
+    }
+  },
   "schemaVersion": "3.4.3",
-  "updatedAt": "2021-12-03T04:01:37.246Z",
+  "updatedAt": "2021-12-07T00:49:15.580Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {}
   },

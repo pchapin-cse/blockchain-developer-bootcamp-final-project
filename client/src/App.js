@@ -1,11 +1,18 @@
 import React, { Component } from "react";
 import SimpleStorageContract from "./contracts/SimpleStorage.json";
+import BookContract from "./contracts/Book.json";
 import getWeb3 from "./getWeb3";
 
 import "./App.css";
 
 class App extends Component {
-  state = { storageValue: 0, web3: null, accounts: null, contract: null };
+  constructor(props) {
+    super(props);
+    this.state = { storageValue: "", web3: null, accounts: null, contract: null, winningTeam: "", losingTeam: "", gameTime: 0, amount: 0 };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
 
   componentDidMount = async () => {
     try {
@@ -17,9 +24,9 @@ class App extends Component {
 
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
-      const deployedNetwork = SimpleStorageContract.networks[networkId];
+      const deployedNetwork = BookContract.networks[networkId];
       const instance = new web3.eth.Contract(
-        SimpleStorageContract.abi,
+        BookContract.abi,
         deployedNetwork && deployedNetwork.address,
       );
 
@@ -36,17 +43,30 @@ class App extends Component {
   };
 
   runExample = async () => {
-    const { accounts, contract } = this.state;
+    const { accounts, contract, web3 } = this.state;
 
-    // Stores a given value, 5 by default.
-    await contract.methods.set(5).send({ from: accounts[0] });
-
-    // Get the value from the contract to prove it worked.
-    const response = await contract.methods.get().call();
+    const response = await contract.methods.getBets().call({gas: 6e6});
+    let table = "<table>\n<tr><td>maker</td><td>winningTeam</td><td>losingTeam</td><td>gameTime</td><td>amount</td><td>state</td></tr>\n"; // lol dirty
+    for (const bet of response) {
+      table += "<tr><td>" + bet.maker + "</td><td>" + web3.utils.toAscii(bet.winningTeam) + "</td><td>" + web3.utils.toAscii(bet.losingTeam) + "</td><td>"
+       + (new Date(bet.gameTime * 1000).toLocaleString()) + "</td><td>" + bet.amount + "</td><td>" + bet.state + "</td></tr>\n";
+    }
+    table += "</table>\n"
 
     // Update state with the result.
-    this.setState({ storageValue: response });
+    this.setState({ storageValue: table });
   };
+  
+  handleSubmit(event) {
+    alert('You put: ' + this.state.winningTeam);
+    const { accounts, contract, web3 } = this.state;
+    contract.methods.bet(web3.utils.asciiToHex(this.state.winningTeam), web3.utils.asciiToHex(this.state.losingTeam), this.state.gameTime).send({ from: accounts[0], value: this.state.amount, gas: 6e6});
+    event.preventDefault();
+  }
+
+  handleChange(event) {
+    this.setState({[event.target.name]: event.target.value});
+  }
 
   render() {
     if (!this.state.web3) {
@@ -57,14 +77,32 @@ class App extends Component {
         <h1>Good to Go!</h1>
         <p>Your Truffle Box is installed and ready.</p>
         <h2>Smart Contract Example</h2>
+        <form onSubmit={this.handleSubmit}>
+          <p>
+            Make a bet?
+          </p>
+          <label>
+            Winning <a target="_blank" href="https://www.wolframalpha.com/input/?i=nfl+team&assumption=%7B%22C%22%2C+%22nfl+team%22%7D+-%3E+%7B%7B%22DataType%22%2C+%22NFL+teams%22%7D%7D">Team Name:</a>
+            <input name="winningTeam" type="text" value={this.state.winningTeam} onChange={this.handleChange} />
+          </label><br />
+          <label>
+            Losing Team Name:
+            <input name="losingTeam" type="text" value={this.state.losingTeam} onChange={this.handleChange} />
+          </label><br />
+          <label>
+            <a target="_blank" href="https://www.unixtimestamp.com/index.php">UNIX</a> Game Time:
+            <input name="gameTime" type="text" value={this.state.gameTime} onChange={this.handleChange} />
+          </label><br />
+          <label>
+            Bet amount in <a target="_blank" href="https://www.investopedia.com/terms/w/wei.asp">wei</a>:
+            <input name="amount" type="text" value={this.state.amount} onChange={this.handleChange} />
+          </label><br />
+          <input type="submit" value="Submit" />
+        </form>
         <p>
-          If your contracts compiled and migrated successfully, below will show
-          a stored value of 5 (by default).
+          Here is the "Book", the list of all bets in the blockchain (refresh page to update):
         </p>
-        <p>
-          Try changing the value stored on <strong>line 42</strong> of App.js.
-        </p>
-        <div>The stored value is: {this.state.storageValue}</div>
+        <div dangerouslySetInnerHTML={{__html: this.state.storageValue}} />
       </div>
     );
   }
